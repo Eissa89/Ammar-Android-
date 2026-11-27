@@ -23,6 +23,7 @@ const REQUIRED_FILES = [
   'www/icons/icon-192.png',
   'www/icons/icon-512.png',
   'android-native/AmmarEasyWindowPlugin.java',
+  'android-native/AmmarDragHandleRule.java',
   'android-native/MainActivity.java',
   'scripts/patch-android.mjs',
   'scripts/test-bridge.mjs',
@@ -121,11 +122,24 @@ async function checkPluginContract() {
   if (!java.includes('EasyWindow.with(')) {
     fail('AmmarEasyWindowPlugin.java: EasyWindow is never created');
   }
+  if (!java.includes('new AmmarDragHandleRule()')) {
+    fail('AmmarEasyWindowPlugin.java: drag-handle rule is not installed');
+  }
+  const dragRule = await fs.readFile(
+    path.join(root, 'android-native', 'AmmarDragHandleRule.java'),
+    'utf8'
+  );
+  if (!dragRule.includes('DRAG_HANDLE_HEIGHT_DP')) {
+    fail('AmmarDragHandleRule.java: drag handle boundary is missing');
+  }
   console.log(`plugin       methods: ${declared.join(', ')}`);
 
   const html = await fs.readFile(path.join(root, 'www', 'index.html'), 'utf8');
   if (!html.includes("'AmmarOverlay'")) {
     fail('www/index.html: does not reference the AmmarOverlay plugin');
+  }
+  if (!html.includes('id="drag-handle"')) {
+    fail('www/index.html: native drag handle indicator is missing');
   }
   if (!html.includes('mode=android') && !html.includes("'android'")) {
     fail('www/index.html: overlay mode query parameter is not handled');
