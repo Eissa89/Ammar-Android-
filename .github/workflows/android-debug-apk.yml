@@ -3,7 +3,7 @@ name: Build Ammar Android Debug APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches: [main, master, ammar-ui-drag-fix]
 
 permissions:
   contents: read
