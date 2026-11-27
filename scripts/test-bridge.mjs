@@ -42,6 +42,7 @@ function boot({ capacitor, androidBridge, search = '' } = {}) {
     'eyes': makeElement()
   };
   const timers = [];
+  const intervals = [];
   const win = {
     location: { search, protocol: 'https:' },
     navigator: { userAgent: 'test', serviceWorker: undefined },
@@ -62,7 +63,7 @@ function boot({ capacitor, androidBridge, search = '' } = {}) {
     console,
     setTimeout: (fn) => { timers.push(fn); return timers.length; },
     clearTimeout() {},
-    setInterval: () => 0,
+    setInterval: (fn) => { intervals.push(fn); return intervals.length; },
     Number,
     Math,
     Promise
@@ -72,7 +73,7 @@ function boot({ capacitor, androidBridge, search = '' } = {}) {
   vm.runInContext(appScript + '\n;globalThis.__ammar = { AmmarNative, AmmarApp };', sandbox, { filename: 'index.html#inline-1' });
   sandbox.AmmarNative = sandbox.__ammar.AmmarNative;
   sandbox.AmmarApp = sandbox.__ammar.AmmarApp;
-  return { sandbox, win, elements };
+  return { sandbox, win, elements, intervals };
 }
 
 // 1. Official Capacitor.registerPlugin path.
@@ -154,7 +155,7 @@ function boot({ capacitor, androidBridge, search = '' } = {}) {
 {
   const moves = [];
   const clicks = [];
-  const { sandbox } = boot({
+  const { sandbox, intervals } = boot({
     search: '?mode=android',
     androidBridge: {
       moveBy: (dx, dy) => moves.push([dx, dy]),
@@ -166,6 +167,8 @@ function boot({ capacitor, androidBridge, search = '' } = {}) {
   assert.deepEqual(await native.checkOverlayPermission(), { granted: true });
   assert.deepEqual(await native.moveBy(18, 4), { moved: true, transport: 'javascript-interface' });
   assert.deepEqual(moves[0], [18, 4]);
+  intervals[0]();
+  assert.equal(moves.length, 1, 'autonomous animation must not reposition the Android overlay');
   await native.notifyClick();
   assert.deepEqual(clicks, ['click']);
   assert.equal(sandbox.AmmarApp.isOverlayMode(), true);
