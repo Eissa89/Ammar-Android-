@@ -164,6 +164,15 @@ async function copyPluginSource(packageName) {
   } else {
     log('AmmarEasyWindowPlugin.java already up to date');
   }
+
+  const dragRuleTarget = path.join(javaDir, 'AmmarDragHandleRule.java');
+  const dragRuleSource = await readText(path.join(nativeSourceDir, 'AmmarDragHandleRule.java'));
+  const dragRuleCurrent = await fs.readFile(dragRuleTarget, 'utf8').catch(() => null);
+  if (dragRuleCurrent !== dragRuleSource) {
+    await writeText(dragRuleTarget, dragRuleSource, 'AmmarDragHandleRule.java installed');
+  } else {
+    log('AmmarDragHandleRule.java already up to date');
+  }
 }
 
 async function installMainActivity(packageName) {
