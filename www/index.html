@@ -9,18 +9,15 @@
     <title>Ammar - رفيقك الذكي</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
-            --bubble-bg: #ffffff;
-            --bubble-text: #1e293b;
-            --accent-color: #ff6b6b;
-            --shadow: 0 10px 25px rgba(0,0,0,0.3);
+            --bg-gradient: linear-gradient(145deg, #101827 0%, #263449 55%, #432b43 100%);
+            --bubble-bg: #f8fafc;
+            --bubble-text: #172033;
+            --accent-color: #d6a85f;
+            --shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
         }
 
-        html {
-            background: transparent;
-        }
+        html { background: transparent; }
 
-        /* الوضع الشفاف عند التشغيل داخل تطبيق الأندرويد العائم */
         body.android-overlay {
             background: transparent !important;
             overflow: hidden;
@@ -44,44 +41,80 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            color: white;
+            color: #f8fafc;
         }
 
-        /* حاوية الشخصية العائمة */
+        /* Compact glass surface for the floating companion. */
         #ammar-stage {
             position: relative;
-            width: 220px;
-            height: 280px;
+            width: 184px;
+            height: 244px;
+            padding: 34px 12px 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-end;
-            cursor: grab;
-            touch-action: none;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(226, 232, 240, 0.20);
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at 50% 32%, rgba(214, 168, 95, 0.16), transparent 46%),
+                linear-gradient(155deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.88));
+            box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255,255,255,0.10);
+            backdrop-filter: blur(16px);
+            cursor: default;
+            touch-action: pan-y;
+            overflow: visible;
         }
 
-        #ammar-stage:active {
-            cursor: grabbing;
-            transform: scale(0.95);
+        #drag-handle {
+            position: absolute;
+            top: 9px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58px;
+            height: 19px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.72);
+            font-size: 9px;
+            line-height: 17px;
+            letter-spacing: 0.3px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #ammar-character {
+            display: block;
+            width: 132px;
+            height: 150px;
+            flex: 0 0 auto;
+            filter: drop-shadow(0 8px 9px rgba(0,0,0,0.22));
+            transform-origin: center bottom;
         }
 
         /* فقاعة الكلام */
         #speech-bubble {
             position: absolute;
-            top: 10px;
+            top: 34px;
+            left: 8px;
+            right: 8px;
+            margin: auto;
+            width: max-content;
             background: var(--bubble-bg);
             color: var(--bubble-text);
-            padding: 12px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            max-width: 220px;
+            padding: 9px 13px;
+            border: 1px solid rgba(255,255,255,0.65);
+            border-radius: 16px;
+            font-size: 12px;
+            line-height: 1.45;
+            font-weight: 650;
+            max-width: 168px;
             text-align: center;
             box-shadow: var(--shadow);
             opacity: 0;
-            transform: translateY(10px) scale(0.8);
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translateY(8px) scale(0.94);
+            transition: all 0.24s ease;
             pointer-events: none;
             z-index: 10;
         }
@@ -104,21 +137,19 @@
 
         /* شارة الاسم */
         .name-badge {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-top: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: rgba(214, 168, 95, 0.14);
+            padding: 5px 15px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-top: 4px;
+            border: 1px solid rgba(214, 168, 95, 0.42);
+            color: #f4d9a7;
         }
 
         body.android-overlay .name-badge {
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(214, 168, 95, 0.14);
         }
 
         /* لوحة التحكم (تختفي تلقائياً في وضع الأندرويد العائم) */
@@ -189,8 +220,9 @@
 </head>
 <body>
 
-    <div id="ammar-stage" title="اضغط للتفاعل مع Ammar">
-        <div id="speech-bubble">أهلاً! أنا Ammar 👋</div>
+    <div id="ammar-stage" title="Ammar">
+        <div id="drag-handle" aria-hidden="true">اسحب للتحريك</div>
+        <div id="speech-bubble">أهلاً! أنا Ammar</div>
 
         <!-- رسم الشخصية باستخدام SVG متجهي عالي الدقة وقابل للتحريك -->
         <svg id="ammar-character" class="idle-anim" width="160" height="180" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
@@ -444,13 +476,8 @@
                     // قلب اتجاه النظر للشخصية
                     character.style.transform = `scaleX(${walkDirection})`;
 
-                    if (!overlayMode) return;
-
-                    const stepX = walkDirection * 18;
-                    const stepY = (Math.random() - 0.5) * 10;
-                    AmmarNative.moveBy(stepX, stepY).catch((error) => {
-                        console.warn('Ammar: move failed', error);
-                    });
+                    // The overlay window is user-positioned. Keep character animation,
+                    // but never move the native window automatically while the user is using it.
                 }, 1200);
 
                 // كلام عشوائي كل 15 ثانية
