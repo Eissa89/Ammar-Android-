@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.ammarcompanion",
+  "appName": "Ammar",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

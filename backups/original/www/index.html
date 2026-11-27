@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1c2c">
+    <meta name="description" content="Ammar — رفيقك التفاعلي العائم">
+    <link rel="manifest" href="manifest.webmanifest">
+    <title>Ammar - رفيقك الذكي</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
+            --bubble-bg: #ffffff;
+            --bubble-text: #1e293b;
+            --accent-color: #ff6b6b;
+            --shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        /* الوضع الشفاف عند التشغيل داخل تطبيق الأندرويد العائم */
+        body.android-overlay {
+            background: transparent !important;
+            overflow: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-gradient);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* حاوية الشخصية العائمة */
+        #ammar-stage {
+            position: relative;
+            width: 220px;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: grab;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #ammar-stage:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        /* فقاعة الكلام */
+        #speech-bubble {
+            position: absolute;
+            top: 10px;
+            background: var(--bubble-bg);
+            color: var(--bubble-text);
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            max-width: 220px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(10px) scale(0.8);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #speech-bubble.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: var(--bubble-bg) transparent transparent;
+        }
+
+        /* شارة الاسم */
+        .name-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        body.android-overlay .name-badge {
+            background: rgba(0, 0, 0, 0.65);
+        }
+
+        /* لوحة التحكم (تختفي تلقائياً في وضع الأندرويد العائم) */
+        .controls {
+            position: fixed;
+            bottom: 25px;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        body.android-overlay .controls {
+            display: none;
+        }
+
+        button {
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.2s;
+        }
+
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        /* حركات الشخصية */
+        @keyframes floatIdle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes happyBounce {
+            0%, 100% { transform: scale(1, 1) translateY(0); }
+            30% { transform: scale(1.1, 0.9) translateY(5px); }
+            60% { transform: scale(0.95, 1.05) translateY(-18px); }
+        }
+
+        .idle-anim {
+            animation: floatIdle 3s ease-in-out infinite;
+        }
+
+        .jump-anim {
+            animation: happyBounce 0.6s ease;
+        }
+
+        /* حركة المشي والتمايل */
+        @keyframes walkWobble {
+            0%, 100% { transform: rotate(-4deg) translateY(0px); }
+            50% { transform: rotate(4deg) translateY(-5px); }
+        }
+
+        .walk-anim {
+            animation: walkWobble 0.45s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ammar-stage" title="اضغط للتفاعل مع Ammar">
+        <div id="speech-bubble">أهلاً! أنا Ammar 👋</div>
+        
+        <!-- رسم الشخصية باستخدام SVG متجهي عالي الدقة وقابل للتحريك -->
+        <svg id="ammar-character" class="idle-anim" width="160" height="180" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- الظل السفلي -->
+            <ellipse cx="100" cy="205" rx="45" ry="10" fill="rgba(0,0,0,0.25)"/>
+            
+            <!-- الجسم -->
+            <rect x="60" y="115" width="80" height="75" rx="35" fill="#3b82f6"/>
+            <path d="M75 115 L125 115 L115 155 L85 155 Z" fill="#60a5fa"/>
+            
+            <!-- الذراع الأيسر -->
+            <g id="left-arm">
+                <rect x="38" y="125" width="22" height="50" rx="11" fill="#2563eb" transform="rotate(15 49 125)"/>
+            </g>
+            
+            <!-- الذراع الأيمن (يلوح) -->
+            <g id="right-arm">
+                <rect x="140" y="125" width="22" height="50" rx="11" fill="#2563eb" transform="rotate(-15 151 125)"/>
+            </g>
+
+            <!-- الرأس -->
+            <circle cx="100" cy="75" r="52" fill="#fde68a"/>
+            
+            <!-- الشعر (ستايل عصري لشخصية Ammar) -->
+            <path d="M48 70 C48 30, 152 30, 152 70 C152 50, 130 40, 100 42 C70 40, 48 50, 48 70 Z" fill="#1e293b"/>
+            <path d="M65 42 Q100 15 135 42 Q115 35 100 38 Q85 35 65 42 Z" fill="#1e293b"/>
+
+            <!-- العيون -->
+            <g id="eyes">
+                <circle cx="80" cy="75" r="7" fill="#1e293b"/>
+                <circle cx="82" cy="73" r="2.5" fill="#ffffff"/>
+                
+                <circle cx="120" cy="75" r="7" fill="#1e293b"/>
+                <circle cx="122" cy="73" r="2.5" fill="#ffffff"/>
+            </g>
+
+            <!-- الخدود -->
+            <ellipse cx="68" cy="88" rx="7" ry="4" fill="#fca5a5" opacity="0.7"/>
+            <ellipse cx="132" cy="88" rx="7" ry="4" fill="#fca5a5" opacity="0.7"/>
+
+            <!-- الفم -->
+            <path id="mouth" d="M88 94 Q100 106 112 94" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none"/>
+        </svg>
+
+        <div class="name-badge">AMMAR</div>
+    </div>
+
+    <!-- أزرار التحكم للتجربة على المتصفح -->
+    <div class="controls">
+        <button onclick="AmmarApp.talk()">تحدث مع Ammar</button>
+        <button onclick="AmmarApp.jump()">اقفز</button>
+        <button onclick="AmmarApp.toggleWalk()">تفعيل/إيقاف التجول</button>
+        <button onclick="AmmarApp.toggleOverlayMode()">معاينة وضع الأندرويد</button>
+    </div>
+
+    <script>
+        /**
+         * وحدة التحكم الرئيسية لشخصية Ammar (النسخة الأولى MVP)
+         * تدعم: الحركة الذاتية، السحب باللمس، وفقاعة الكلام، والتواصل مع EasyWindow
+         */
+        const AmmarApp = (() => {
+            const lines = [
+                "أهلاً بك! أنا Ammar، كيف يمكنني مساعدتك اليوم؟",
+                "أنا أتجول على شاشتك الآن! 🚶‍♂️",
+                "اسحبني بإصبعك إلى أي مكان تريده.",
+                "يوم جميل للإنجاز والإبداع!",
+                "لا تنسَ شرب الماء وأخذ قسط من الراحة 😊"
+            ];
+
+            const stage = document.getElementById('ammar-stage');
+            const character = document.getElementById('ammar-character');
+            const bubble = document.getElementById('speech-bubble');
+            const mouth = document.getElementById('mouth');
+            const eyes = document.getElementById('eyes');
+
+            let bubbleTimeout = null;
+            let isWalking = true;
+            let walkDirection = 1; // 1 لليمين، -1 لليسار
+
+            function initEnvironment() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('mode') === 'android' || navigator.userAgent.includes('AmmarAndroidApp')) {
+                    document.body.classList.add('android-overlay');
+                }
+            }
+
+            function talk(customText = null) {
+                const text = customText || lines[Math.floor(Math.random() * lines.length)];
+                bubble.textContent = text;
+                bubble.classList.add('visible');
+
+                mouth.setAttribute('d', 'M88 92 Q100 112 112 92 Z');
+                setTimeout(() => {
+                    mouth.setAttribute('d', 'M88 94 Q100 106 112 94');
+                }, 400);
+
+                clearTimeout(bubbleTimeout);
+                bubbleTimeout = setTimeout(() => {
+                    bubble.classList.remove('visible');
+                }, 3500);
+            }
+
+            function jump() {
+                character.classList.remove('idle-anim', 'walk-anim', 'jump-anim');
+                void character.offsetWidth;
+                character.classList.add('jump-anim');
+
+                setTimeout(() => {
+                    character.classList.remove('jump-anim');
+                    character.classList.add(isWalking ? 'walk-anim' : 'idle-anim');
+                }, 600);
+            }
+
+            // محرك الحركة الذاتية (يرسل إحداثيات الحركة إلى EasyWindow في الأندرويد)
+            function startAutonomousBehavior() {
+                setInterval(() => {
+                    if (!isWalking) return;
+
+                    // تغيير الاتجاه عشوائياً أو التوقف للراحة
+                    if (Math.random() < 0.25) {
+                        character.classList.remove('walk-anim');
+                        character.classList.add('idle-anim');
+                        return;
+                    }
+
+                    character.classList.remove('idle-anim');
+                    character.classList.add('walk-anim');
+
+                    if (Math.random() < 0.3) walkDirection *= -1;
+                    
+                    // قلب اتجاه النظر للشخصية
+                    character.style.transform = `scaleX(${walkDirection})`;
+
+                    const stepX = walkDirection * 18;
+                    const stepY = (Math.random() - 0.5) * 10;
+
+                    // إرسال أمر تحريك النافذة العائمة إلى الأندرويد (EasyWindow)
+                    if (window.AndroidBridge && window.AndroidBridge.moveBy) {
+                        window.AndroidBridge.moveBy(stepX, stepY);
+                    }
+                }, 1200);
+
+                // كلام عشوائي كل 15 ثانية
+                setInterval(() => {
+                    if (Math.random() < 0.4) talk();
+                }, 15000);
+            }
+
+            function toggleWalk() {
+                isWalking = !isWalking;
+                character.classList.remove('walk-anim', 'idle-anim');
+                character.classList.add(isWalking ? 'walk-anim' : 'idle-anim');
+                talk(isWalking ? "عدتُ للتجول! 🏃‍♂️" : "سأستريح هنا قليلاً 🧘‍♂️");
+            }
+
+            function startBlinking() {
+                setInterval(() => {
+                    eyes.style.transform = 'scaleY(0.1)';
+                    eyes.style.transformOrigin = 'center 75px';
+                    setTimeout(() => {
+                        eyes.style.transform = 'scaleY(1)';
+                    }, 150);
+                }, 4000);
+            }
+
+            function getOverlayPlugin() {
+                return window.Capacitor && window.Capacitor.Plugins
+                    ? window.Capacitor.Plugins.AmmarOverlay
+                    : null;
+            }
+
+            async function launchAndroidOverlay() {
+                const plugin = getOverlayPlugin();
+                if (!plugin) {
+                    talk("تشغيل Ammar فوق التطبيقات يتطلب تثبيت نسخة Android.");
+                    return;
+                }
+                try {
+                    const permission = await plugin.checkOverlayPermission();
+                    if (!permission.granted) {
+                        await plugin.requestOverlayPermission();
+                        talk("اسمح لـ Ammar بالظهور فوق التطبيقات من إعدادات Android، ثم ارجع واضغط الزر مرة أخرى.");
+                        return;
+                    }
+                    await plugin.showAmmar();
+                    talk("أصبحتُ ظاهرًا فوق التطبيقات.");
+                } catch (error) {
+                    console.error("Ammar overlay error:", error);
+                    talk("تعذر تشغيل النافذة العائمة. تحقق من صلاحية الظهور فوق التطبيقات.");
+                }
+            }
+
+            async function hideAndroidOverlay() {
+                const plugin = getOverlayPlugin();
+                if (!plugin) {
+                    talk("زر الإخفاء يعمل داخل تطبيق Android فقط.");
+                    return;
+                }
+                try {
+                    await plugin.hideAmmar();
+                    talk("تم إخفائي من فوق التطبيقات.");
+                } catch (error) {
+                    console.error("Ammar overlay hide error:", error);
+                    talk("تعذر إخفاء النافذة العائمة.");
+                }
+            }
+
+            function toggleOverlayMode() {
+                document.body.classList.toggle('android-overlay');
+            }
+
+            function autoLaunchOverlayWhenAllowed() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('mode') === 'android') return;
+                const plugin = getOverlayPlugin();
+                if (!plugin) return;
+                plugin.checkOverlayPermission().then((permission) => {
+                    if (permission && permission.granted) {
+                        plugin.showAmmar().catch((error) => console.error(error));
+                    } else {
+                        talk("امنحني صلاحية الظهور فوق التطبيقات من الزر المخصص.");
+                    }
+                }).catch((error) => console.error(error));
+            }
+
+            stage.addEventListener('click', () => {
+                jump();
+                talk();
+                if (window.AndroidBridge && window.AndroidBridge.onAmmarClicked) {
+                    window.AndroidBridge.onAmmarClicked();
+                }
+            });
+
+            initEnvironment();
+            startBlinking();
+            startAutonomousBehavior();
+            setTimeout(() => talk("مرحباً! أنا Ammar جاهز للعمل."), 800);
+            setTimeout(autoLaunchOverlayWhenAllowed, 1200);
+
+            return { talk, jump, toggleWalk, toggleOverlayMode, launchAndroidOverlay, hideAndroidOverlay };
+        })();
+    </script>
+
+<script>
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "ammar-android-mvp",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Ammar interactive floating companion for Android using Capacitor and EasyWindow",
+  "scripts": {
+    "prepare": "node scripts/sync-vendor.mjs",
+    "validate": "node scripts/validate-web.mjs",
+    "test": "node scripts/test-bridge.mjs",
+    "android:init": "node scripts/android-init.mjs",
+    "android:patch": "node scripts/patch-android.mjs",
+    "android:sync": "node scripts/sync-vendor.mjs && npx cap sync android",
+    "android:build": "node scripts/android-build.mjs",
+    "android:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

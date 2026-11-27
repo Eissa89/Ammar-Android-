@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Capacitor generated Android project (created by "npm run android:init")
+android/
+!android-native/
+
+# Generated vendor bundle (copied from node_modules by scripts/sync-vendor.mjs)
+www/vendor/
+
+# Build output
+build/
+*.apk
+*.aab
+build.log
+.gradle/
+local.properties
+
+# Patch backups created at build time
+backups/generated/
+
+# Editors and OS files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local APK artifact for manual testing
+dist/
