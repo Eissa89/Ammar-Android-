@@ -33,7 +33,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.hjq.window.EasyWindow;
-import com.hjq.window.draggable.MovingWindowDraggableRule;
+import com.example.ammarcompanion.AmmarDragHandleRule;
 
 import org.json.JSONObject;
 
@@ -56,8 +56,8 @@ public class AmmarEasyWindowPlugin extends Plugin {
     private static final String ASSET_URL_PREFIX = "file:///android_asset/";
     private static final String JS_BRIDGE_NAME = "AndroidBridge";
 
-    private static final int WINDOW_WIDTH_DP = 220;
-    private static final int WINDOW_HEIGHT_DP = 280;
+    private static final int WINDOW_WIDTH_DP = 184;
+    private static final int WINDOW_HEIGHT_DP = 244;
     private static final int START_X_DP = 12;
     private static final int START_Y_DP = 140;
     /** Upper bound for one JS-driven movement step, in dp. */
@@ -268,7 +268,7 @@ public class AmmarEasyWindowPlugin extends Plugin {
             .setContentView(webView)
             .setWindowSize(width, height)
             .setWindowLocation(Gravity.TOP | Gravity.LEFT, startX, startY)
-            .setWindowDraggableRule(new MovingWindowDraggableRule());
+            .setWindowDraggableRule(new AmmarDragHandleRule());
     }
 
     private void destroyOverlayWindow() {
